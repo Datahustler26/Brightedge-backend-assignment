@@ -454,7 +454,7 @@
             </a>
             <div class="nav-links">
                 <a href="#" class="nav-link active"><i class="fa-solid fa-magnifying-glass"></i> Single URL Crawl</a>
-                <a href="#system-design-anchor" class="nav-link"><i class="fa-solid fa-diagram-project"></i> System Design Doc</a>
+                <a href="#system-design-section" class="nav-link"><i class="fa-solid fa-diagram-project"></i> System Design Architecture</a>
             </div>
         </div>
     </header>
@@ -642,6 +642,34 @@
             </div>
 
         </div>
+
+        <!-- System Design Architecture Overview Card -->
+        <div id="system-design-section" class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fa-solid fa-diagram-project"></i> System Architecture Overview (Part 2: Billions Scale)
+                </div>
+                <span class="badge-tag">5 Billion URLs / Month</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-top: 1rem;">
+                <div style="background: rgba(10, 14, 23, 0.6); padding: 1.2rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06);">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-cloud-arrow-down"></i> 1. Ingestion Layer</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Batch ingestion from MySQL / S3 dumps streaming into domain-partitioned Kafka topics with Bloom Filter deduplication (~6.2 GB RAM for 5B URLs).</p>
+                </div>
+                <div style="background: rgba(10, 14, 23, 0.6); padding: 1.2rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06);">
+                    <h4 style="color: var(--accent-green); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-microchip"></i> 2. Distributed Crawler</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Kubernetes HPA Auto-scaler with Spot instances running async workers, CoreDNS caching, and per-domain politeness token buckets.</p>
+                </div>
+                <div style="background: rgba(10, 14, 23, 0.6); padding: 1.2rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06);">
+                    <h4 style="color: var(--accent-amber); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-database"></i> 3. Unified Storage</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">ClickHouse Columnar DB for sub-second SQL analytics, OpenSearch for full-text topic search, and AWS S3 ZSTD Parquet lake saving 80% storage cost.</p>
+                </div>
+                <div style="background: rgba(10, 14, 23, 0.6); padding: 1.2rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06);">
+                    <h4 style="color: var(--accent-pink); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-chart-line"></i> 4. Observability & SLOs</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">99.9% Availability SLA, P95 &lt; 2s crawl latency, 11 9s durability with Prometheus/Grafana real-time metrics tracking queue lag.</p>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer>
@@ -673,8 +701,8 @@
                 const data = await response.json();
                 document.getElementById('loader').style.display = 'none';
 
-                if (!data.success && data.status_code >= 400) {
-                    alert('Crawl error: ' + (data.error || 'Failed to fetch URL'));
+                if (!data.success) {
+                    alert('Crawl error: ' + (data.error || 'Failed to fetch or parse URL'));
                     return;
                 }
 
@@ -715,7 +743,13 @@
             const meta = data.metadata || {};
             document.getElementById('metaTitle').innerText = meta.title || 'N/A';
             document.getElementById('metaDesc').innerText = meta.description || 'N/A';
-            document.getElementById('metaCanonical').innerText = meta.canonical_url || 'N/A';
+            
+            if (meta.canonical_url) {
+                document.getElementById('metaCanonical').innerHTML = `<a href="${meta.canonical_url}" target="_blank" style="color: var(--primary); text-decoration: underline;">${meta.canonical_url}</a>`;
+            } else {
+                document.getElementById('metaCanonical').innerText = 'N/A';
+            }
+
             document.getElementById('metaLang').innerText = meta.language || 'N/A';
             document.getElementById('metaH1').innerText = (meta.h1_headings || []).join(' | ') || 'None';
             document.getElementById('metaCounts').innerText = `${meta.links_count || 0} links, ${meta.images_count || 0} images`;
