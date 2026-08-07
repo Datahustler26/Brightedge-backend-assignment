@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrightEdge Scale Crawler - Web Metadata & Topic Analysis Engine</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #07090e;
+            --card-bg: rgba(18, 24, 38, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-border-hover: rgba(99, 102, 241, 0.35);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-dim: #6b7280;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-heading: 'Outfit', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            background: rgba(7, 9, 14, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1350px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-pink));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #fff;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .brand-title {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge-tag {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #fff;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1350px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-title {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 700px;
+            margin: 0 auto 2rem auto;
+        }
+
+        /* Search Input Box */
+        .crawler-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            margin-bottom: 2rem;
+            transition: border-color 0.3s;
+        }
+
+        .crawler-box:focus-within {
+            border-color: var(--card-border-hover);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .url-input {
+            flex: 1;
+            background: rgba(10, 14, 23, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.9rem 1.25rem;
+            color: #fff;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .url-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-crawl {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.9rem 1.8rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn-crawl:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        /* Test Preset Buttons */
+        .presets-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #d1d5db;
+            border-radius: 8px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .preset-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #fff;
+        }
+
+        /* Results Layout */
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        /* Classification Badge */
+        .category-badge {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Topic Pills */
+        .topics-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .topic-pill {
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #c7d2fe;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .tag-pill {
+            background: rgba(236, 72, 153, 0.12);
+            border: 1px solid rgba(236, 72, 153, 0.25);
+            color: #fbcfe8;
+            padding: 0.3rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 500;
+        }
+
+        /* Stats Row */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            background: rgba(10, 14, 23, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Meta Table */
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .meta-table td {
+            padding: 0.65rem 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .meta-key {
+            color: var(--text-muted);
+            font-weight: 500;
+            width: 160px;
+        }
+
+        .meta-val {
+            color: #fff;
+            word-break: break-word;
+        }
+
+        /* JSON Code Viewer */
+        .json-viewer {
+            background: #090d16;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: var(--font-code);
+            font-size: 0.82rem;
+            color: #a7f3d0;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            border-top: 1px solid var(--card-border);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="#" class="brand-logo">
+                <div class="logo-icon"><i class="fa-solid fa-spider"></i></div>
+                <div class="brand-title">BrightEdge Crawler Engine</div>
+                <span class="badge-tag">Scale & Metadata Platform</span>
+            </a>
+            <div class="nav-links">
+                <a href="#" class="nav-link active"><i class="fa-solid fa-magnifying-glass"></i> Single URL Crawl</a>
+                <a href="#system-design-anchor" class="nav-link"><i class="fa-solid fa-diagram-project"></i> System Design Doc</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="hero-section">
+            <h1 class="hero-title">High-Performance Web Metadata & Topic Extractor</h1>
+            <p class="hero-subtitle">Generically crawl, extract HTML metadata, classify page type, and analyze topic signals across billions of URLs.</p>
+        </div>
+
+        <!-- Crawler Input Form -->
+        <div class="crawler-box">
+            <form id="crawlForm" onsubmit="handleCrawl(event)">
+                <div class="input-group">
+                    <input type="url" id="urlInput" class="url-input" placeholder="Enter target URL (e.g. https://www.amazon.com/dp/B009GQ034C)..." required />
+                    <button type="submit" class="btn-crawl">
+                        <i class="fa-solid fa-bolt"></i> Crawl & Analyze
+                    </button>
+                </div>
+            </form>
+
+            <div class="presets-label">
+                <i class="fa-solid fa-vial"></i> <strong>Assignment Test URLs (Click to auto-fill & run):</strong>
+            </div>
+            <div class="preset-buttons">
+                <button type="button" class="preset-btn" onclick="runPreset('http://www.amazon.com/Cuisinart-CPT-122-Compact-2-Slice-Toaster/dp/B009GQ034C/ref=sr_1_1?s=kitchen&ie=UTF8&qid=1431620315&sr=1-1&keywords=toaster')">
+                    <i class="fa-solid fa-cart-shopping" style="color:#f59e0b;"></i> Amazon Toaster (Product)
+                </button>
+                <button type="button" class="preset-btn" onclick="runPreset('http://blog.rei.com/camp/how-to-introduce-your-indoorsy-friend-to-the-outdoors/')">
+                    <i class="fa-solid fa-compass" style="color:#10b981;"></i> REI Camp Blog (Editorial)
+                </button>
+                <button type="button" class="preset-btn" onclick="runPreset('https://www.cnn.com/2025/09/23/tech/google-study-90-percent-tech-jobs-ai')">
+                    <i class="fa-solid fa-newspaper" style="color:#6366f1;"></i> CNN Tech AI (News Article)
+                </button>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="loader">
+            <div class="spinner"></div>
+            <p style="color: var(--text-muted); font-weight: 500;">Crawling page, executing HTML parser & topic classification engine...</p>
+        </div>
+
+        <!-- Initial Placeholder -->
+        <div id="emptyState" class="card" style="text-align: center; padding: 4rem 2rem;">
+            <i class="fa-solid fa-globe" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem; opacity: 0.7;"></i>
+            <h3 style="color: #fff; margin-bottom: 0.5rem;">Ready to Crawl Any Web Page</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 500px; margin: 0 auto;">Select one of the sample URLs above or type any web page URL to inspect metadata extraction, classification category, and topic insights.</p>
+        </div>
+
+        <!-- Results Display Section -->
+        <div id="resultsWrapper" style="display: none;">
+            
+            <!-- Quick Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div id="statStatus" class="stat-val" style="color: var(--accent-green);">200</div>
+                    <div class="stat-label">HTTP Status</div>
+                </div>
+                <div class="stat-box">
+                    <div id="statTime" class="stat-val" style="color: var(--accent-cyan);">245 ms</div>
+                    <div class="stat-label">Crawl Time</div>
+                </div>
+                <div class="stat-box">
+                    <div id="statWords" class="stat-val" style="color: var(--accent-amber);">1,420</div>
+                    <div class="stat-label">Word Count</div>
+                </div>
+                <div class="stat-box">
+                    <div id="statRead" class="stat-val" style="color: var(--accent-pink);">7.1 min</div>
+                    <div class="stat-label">Read Time</div>
+                </div>
+            </div>
+
+            <div class="results-container">
+                <!-- Left Main Column -->
+                <div>
+                    <!-- Classification & Topics Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-brain"></i> Page Classification & Topic Analysis
+                            </div>
+                            <div id="categoryBadge" class="category-badge">
+                                <i class="fa-solid fa-layer-group"></i> E-Commerce Product Page
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Relevant Topics Detected:</label>
+                            <div id="topicsGrid" class="topics-grid">
+                                <span class="topic-pill">Cuisinart</span>
+                                <span class="topic-pill">Toaster</span>
+                                <span class="topic-pill">Kitchen</span>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Content Tags:</label>
+                            <div id="tagsGrid" class="topics-grid" style="margin-top: 0.4rem;">
+                                <span class="tag-pill">Product Page</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Entities Detected:</label>
+                            <div id="entitiesGrid" class="topics-grid" style="margin-top: 0.4rem;">
+                                <span class="tag-pill" style="background: rgba(16, 185, 129, 0.12); color: #a7f3d0; border-color: rgba(16, 185, 129, 0.3);">Cuisinart</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata Table Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-list-check"></i> Extracted HTML Metadata
+                            </div>
+                        </div>
+                        <table class="meta-table">
+                            <tbody>
+                                <tr>
+                                    <td class="meta-key">Title</td>
+                                    <td id="metaTitle" class="meta-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td class="meta-key">Description</td>
+                                    <td id="metaDesc" class="meta-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td class="meta-key">Canonical URL</td>
+                                    <td id="metaCanonical" class="meta-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td class="meta-key">Language</td>
+                                    <td id="metaLang" class="meta-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td class="meta-key">H1 Headings</td>
+                                    <td id="metaH1" class="meta-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td class="meta-key">Links & Images</td>
+                                    <td id="metaCounts" class="meta-val">--</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Clean Body Text Snippet Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-align-left"></i> Extracted Main Content Snippet
+                            </div>
+                        </div>
+                        <p id="bodySnippet" style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; background: rgba(10, 14, 23, 0.5); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);"></p>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar Column -->
+                <div>
+                    <!-- OpenGraph Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-share-nodes"></i> OpenGraph Preview
+                            </div>
+                        </div>
+                        <div id="ogContainer" style="background: rgba(10, 14, 23, 0.6); border-radius: 12px; padding: 0.85rem; border: 1px solid rgba(255, 255, 255, 0.08);">
+                            <div id="ogTitle" style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 0.4rem;">--</div>
+                            <div id="ogDesc" style="font-size: 0.82rem; color: var(--text-muted);">--</div>
+                        </div>
+                    </div>
+
+                    <!-- Raw JSON Response Inspector -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-code"></i> Raw JSON Output
+                            </div>
+                        </div>
+                        <pre id="jsonInspector" class="json-viewer"></pre>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        BrightEdge Software Engineering Assignment - Scalable Web Crawler & Metadata System Architecture
+    </footer>
+
+    <script>
+        function runPreset(url) {
+            document.getElementById('urlInput').value = url;
+            handleCrawl(new Event('submit'));
+        }
+
+        async function handleCrawl(event) {
+            if (event) event.preventDefault();
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) return;
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultsWrapper').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/crawl', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+                document.getElementById('loader').style.display = 'none';
+
+                if (!data.success && data.status_code >= 400) {
+                    alert('Crawl error: ' + (data.error || 'Failed to fetch URL'));
+                    return;
+                }
+
+                renderResults(data);
+            } catch (err) {
+                document.getElementById('loader').style.display = 'none';
+                alert('Network or server error: ' + err.message);
+            }
+        }
+
+        function renderResults(data) {
+            document.getElementById('resultsWrapper').style.display = 'block';
+
+            // Stats
+            document.getElementById('statStatus').innerText = data.status_code;
+            document.getElementById('statStatus').style.color = data.status_code < 400 ? 'var(--accent-green)' : 'var(--accent-pink)';
+            document.getElementById('statTime').innerText = data.response_time_ms + ' ms';
+            document.getElementById('statWords').innerText = (data.metadata?.word_count || 0).toLocaleString();
+            document.getElementById('statRead').innerText = (data.metadata?.estimated_read_time_min || 0) + ' min';
+
+            // Category & Topics
+            const cls = data.classification || {};
+            document.getElementById('categoryBadge').innerHTML = `<i class="fa-solid fa-layer-group"></i> ${cls.primary_category || 'General Page'}`;
+
+            // Topics pills
+            const topicsGrid = document.getElementById('topicsGrid');
+            topicsGrid.innerHTML = (cls.topics || []).map(t => `<span class="topic-pill">${t}</span>`).join('');
+
+            // Tags
+            const tagsGrid = document.getElementById('tagsGrid');
+            tagsGrid.innerHTML = (cls.content_tags || []).map(t => `<span class="tag-pill">${t}</span>`).join('');
+
+            // Entities
+            const entitiesGrid = document.getElementById('entitiesGrid');
+            entitiesGrid.innerHTML = (cls.entities || []).map(e => `<span class="tag-pill" style="background: rgba(16, 185, 129, 0.12); color: #a7f3d0; border-color: rgba(16, 185, 129, 0.3);">${e}</span>`).join('');
+
+            // Meta table
+            const meta = data.metadata || {};
+            document.getElementById('metaTitle').innerText = meta.title || 'N/A';
+            document.getElementById('metaDesc').innerText = meta.description || 'N/A';
+            document.getElementById('metaCanonical').innerText = meta.canonical_url || 'N/A';
+            document.getElementById('metaLang').innerText = meta.language || 'N/A';
+            document.getElementById('metaH1').innerText = (meta.h1_headings || []).join(' | ') || 'None';
+            document.getElementById('metaCounts').innerText = `${meta.links_count || 0} links, ${meta.images_count || 0} images`;
+
+            // Body snippet
+            document.getElementById('bodySnippet').innerText = meta.body_snippet || 'No main body content extracted.';
+
+            // OG metadata
+            const og = meta.og_metadata || {};
+            document.getElementById('ogTitle').innerText = og['og:title'] || meta.title || 'No OG Title';
+            document.getElementById('ogDesc').innerText = og['og:description'] || meta.description || 'No OG Description';
+
+            // JSON inspector
+            document.getElementById('jsonInspector').innerText = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
