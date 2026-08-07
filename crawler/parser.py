@@ -138,11 +138,38 @@ def parse_html(url: str, html_content: str) -> MetadataResult:
 
     # 11. Extract Clean Body Text
     soup_clean = BeautifulSoup(html_content, "lxml")
-    for elem in soup_clean(["script", "style", "nav", "footer", "header", "noscript", "svg", "form", "iframe"]):
+    for elem in soup_clean(["script", "style", "nav", "footer", "header", "noscript", "svg", "form", "iframe", "aside"]):
         elem.extract()
 
-    main_content = soup_clean.find("main") or soup_clean.find("article") or soup_clean.find("div", class_=re.compile(r"content|body|post|article", re.I)) or soup_clean.body or soup_clean
-    body_text_raw = main_content.get_text(separator=" ", strip=True)
+    # Remove ad and sponsored elements
+    for ad_elem in soup_clean.find_all(class_=re.compile(r"sponsored|ad-slot|ad-container|promotional-banner|cookie", re.I)):
+        ad_elem.extract()
+    for ad_elem in soup_clean.find_all(id=re.compile(r"sponsored|ad-slot|ad-container", re.I)):
+        ad_elem.extract()
+
+    # Find candidates for main content
+    content_candidates = []
+    
+    # Priority containers for e-commerce and articles
+    for container_id in ["dp", "centerCol", "productDescription", "feature-bullets", "main-content", "article-content"]:
+        matched = soup_clean.find(id=container_id)
+        if matched and len(matched.get_text(strip=True)) > 20:
+            content_candidates.append(matched)
+
+    main_tag = soup_clean.find("main") or soup_clean.find("article")
+    if main_tag and len(main_tag.get_text(strip=True)) > 20:
+        content_candidates.append(main_tag)
+
+    for div in soup_clean.find_all("div", class_=re.compile(r"^(content|main-content|post-content|article-body|entry-content|page-content)$", re.I)):
+        if len(div.get_text(strip=True)) > 20:
+            content_candidates.append(div)
+
+    if not content_candidates:
+        content_candidates.append(soup_clean.body or soup_clean)
+
+    # Select the candidate with the highest text length to avoid small boilerplate boxes
+    best_candidate = max(content_candidates, key=lambda c: len(c.get_text(strip=True)) if c else 0)
+    body_text_raw = best_candidate.get_text(separator=" ", strip=True) if best_candidate else ""
     body_text_clean = re.sub(r"\s+", " ", body_text_raw).strip()
 
     words = re.findall(r"\b[a-zA-Z0-9]+\b", body_text_clean)

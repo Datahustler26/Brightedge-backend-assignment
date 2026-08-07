@@ -13,7 +13,7 @@ TEST_URLS = [
     },
     {
         "name": "REI Outdoors Blog URL",
-        "url": "http://blog.rei.com/camp/how-to-introduce-your-indoorsy-friend-to-the-outdoors/"
+        "url": "https://www.rei.com/blog/camp/how-to-introduce-your-indoorsy-friend-to-the-outdoors/"
     },
     {
         "name": "CNN Tech AI News URL",
