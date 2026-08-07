@@ -56,18 +56,15 @@ async def crawl_single_url(req: CrawlRequest):
 
     # Handle fetch failure
     if fetch_res.status_code >= 400 and not fetch_res.raw_html:
-        return JSONResponse(
-            status_code=200,
-            content={
-                "success": False,
-                "url": url,
-                "status_code": fetch_res.status_code,
-                "error": fetch_res.error or f"HTTP error {fetch_res.status_code}",
-                "response_time_ms": fetch_res.response_time_ms,
-                "metadata": None,
-                "classification": None
-            }
-        )
+        return {
+            "success": False,
+            "url": url,
+            "status_code": fetch_res.status_code,
+            "error": fetch_res.error or f"HTTP error {fetch_res.status_code}",
+            "response_time_ms": fetch_res.response_time_ms,
+            "metadata": None,
+            "classification": None
+        }
 
     # Step 2: Extract HTML Metadata
     metadata = parse_html(fetch_res.final_url, fetch_res.raw_html)

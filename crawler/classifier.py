@@ -86,10 +86,10 @@ def classify_and_extract_topics(
     elif "article" in og_type:
         category_scores["Blog / Editorial Article"] += 4
 
-    # Signal 3: Content Keyword matching
-    ecommerce_keywords = ["price", "add to cart", "customer reviews", "ratings", "prime", "shipping", "in stock", "toaster", "compact", "slice", "cuisinart", "kitchen"]
-    blog_keywords = ["how to", "guide", "tips", "outdoors", "friends", "camping", "hiking", "introductory", "advice", "experience"]
-    news_keywords = ["report", "study", "percent", "jobs", "ai", "artificial intelligence", "tech", "published", "according to", "spokesperson", "interview"]
+    # Signal 3: Content Keyword matching (generic e-commerce, blog, news, tech indicators)
+    ecommerce_keywords = ["price", "add to cart", "customer reviews", "ratings", "prime", "shipping", "in stock", "sku", "specs", "specifications", "description", "checkout", "buy now", "discount", "order"]
+    blog_keywords = ["how to", "guide", "tips", "tutorial", "advice", "overview", "introduction", "journey", "story", "experience", "best practices", "ideas", "step by step"]
+    news_keywords = ["report", "study", "breaking news", "journalism", "press release", "published", "according to", "spokesperson", "interview", "analysis", "coverage", "survey", "percent", "ai", "tech"]
 
     for kw in ecommerce_keywords:
         if kw in lower_corpus:
@@ -98,14 +98,12 @@ def classify_and_extract_topics(
     for kw in blog_keywords:
         if kw in lower_corpus:
             category_scores["Blog / Editorial Article"] += 1.5
-            if kw in ["outdoors", "camping", "hiking"]:
-                category_scores["Outdoors & Recreation"] += 3
 
     for kw in news_keywords:
         if kw in lower_corpus:
             category_scores["News Article"] += 1.2
-            if kw in ["ai", "artificial intelligence", "jobs", "tech"]:
-                category_scores["Technology / AI Report"] += 2.5
+            if kw in ["ai", "tech", "study", "report"]:
+                category_scores["Technology / AI Report"] += 1.5
 
     # Determine Winning Category
     winning_category = max(category_scores, key=category_scores.get)
@@ -134,14 +132,14 @@ def classify_and_extract_topics(
     # Extract top 8 relevant topics
     top_topics = [item[0] for item in weighted_counter.most_common(12)]
 
-    # 3. Entity Extraction (Brand names, products, specific terms)
-    known_entities = {
-        "Amazon", "Cuisinart", "REI", "CNN", "Google", "Apple", "Microsoft", "Meta",
-        "Toaster", "Outdoors", "Camping", "Artificial Intelligence", "Tech Jobs", "Kitchen", "Automotive"
-    }
-    detected_entities = [ent for ent in known_entities if ent.lower() in lower_corpus or ent.lower() in path]
+    # 3. Dynamic Entity Extraction (Proper Nouns & Organization/Product names from Title & Corpus)
+    capitalized_entities = set(re.findall(r"\b[A-Z][a-zA-C0-9]{2,15}\b", title))
+    capitalized_entities.update(re.findall(r"\b[A-Z][a-zA-C0-9]{2,15}(?:\s+[A-Z][a-zA-C0-9]{2,15})?\b", " ".join(h1_headings)))
+    
+    # Filter out common capitalized words that match stopwords
+    detected_entities = [ent for ent in capitalized_entities if ent.lower() not in STOPWORDS and len(ent) > 2][:6]
 
-    # Additional entity fallback from title
+    # Fallback to title keywords if no capitalized entities detected
     if not detected_entities and title_words:
         detected_entities = title_words[:3]
 

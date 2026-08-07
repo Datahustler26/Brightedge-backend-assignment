@@ -78,9 +78,9 @@ flowchart TB
 | Module | File Link | Responsibilities |
 | :--- | :--- | :--- |
 | **API Server** | [app.py](app.py) | FastAPI application exposing REST endpoints (`POST /api/crawl`, `POST /api/crawl/batch`, `GET /api/health`) and serving the Web Dashboard UI. |
-| **Async Fetcher** | [crawler/fetcher.py](crawler/fetcher.py) | Async HTTP client built on `httpx` with randomized User-Agent rotation, header spoofing, SSL fallback handling, and status code recording. |
+| **Async Fetcher** | [crawler/fetcher.py](crawler/fetcher.py) | Generic async HTTP client built on `httpx` with randomized User-Agent rotation, custom browser headers, default SSL verification, and status code recording. |
 | **HTML Metadata Parser**| [crawler/parser.py](crawler/parser.py) | DOM parser using `BeautifulSoup4` + `lxml`. Extracts Title, Meta Description, Meta Keywords, Canonical URL, Language, OpenGraph (`og:*`), Twitter Cards, H1-H3 headings, word count, estimated read time, link/image counts, and clean body text. |
-| **Topic Classifier** | [crawler/classifier.py](crawler/classifier.py) | NLP Classification & Topic Extraction engine. Categorizes page types (`E-Commerce Product Page`, `Blog / Editorial Article`, `News Article`) and extracts top topic phrases and brand/product entities. |
+| **Topic Classifier** | [crawler/classifier.py](crawler/classifier.py) | Generic NLP Classification & Topic Extraction engine. Categorizes page types (`E-Commerce Product Page`, `Blog / Editorial Article`, `News Article`) using domain-agnostic signals and dynamic proper-noun entity extraction. |
 | **Web Dashboard UI** | [static/index.html](static/index.html) | Glassmorphic UI with instant test buttons for assignment URLs (Amazon Toaster, REI Blog, CNN Tech), metadata table preview, topic pills, OpenGraph social card preview, and raw JSON tree inspector. |
 | **CLI Test Suite** | [test_crawler.py](test_crawler.py) | Programmatic test script executing the crawler on the 3 sample assignment URLs. |
 
