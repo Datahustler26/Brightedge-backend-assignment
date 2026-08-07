@@ -133,8 +133,8 @@ def classify_and_extract_topics(
     top_topics = [item[0] for item in weighted_counter.most_common(12)]
 
     # 3. Dynamic Entity Extraction (Proper Nouns & Organization/Product names from Title & Corpus)
-    capitalized_entities = set(re.findall(r"\b[A-Z][a-zA-C0-9]{2,15}\b", title))
-    capitalized_entities.update(re.findall(r"\b[A-Z][a-zA-C0-9]{2,15}(?:\s+[A-Z][a-zA-C0-9]{2,15})?\b", " ".join(h1_headings)))
+    capitalized_entities = set(re.findall(r"\b[A-Z][a-zA-Z0-9]{1,15}\b", title))
+    capitalized_entities.update(re.findall(r"\b[A-Z][a-zA-Z0-9]{1,15}(?:\s+[A-Z][a-zA-Z0-9]{1,15})?\b", " ".join(h1_headings)))
     
     # Filter out common capitalized words that match stopwords
     detected_entities = [ent for ent in capitalized_entities if ent.lower() not in STOPWORDS and len(ent) > 2][:6]
