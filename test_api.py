@@ -4,7 +4,9 @@ import httpx
 from app import app
 
 async def main():
-    async with httpx.AsyncClient(app=app, base_url="http://testserver") as client:
+    # Use ASGITransport for modern httpx (>= 0.28.0) compatibility
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
         print("\n--- Testing GET /api/health ---")
         res = await client.get("/api/health")
         print("Health Status:", res.status_code, res.json())
