@@ -40,6 +40,13 @@ async def fetch_page(url: str, timeout: float = 15.0) -> FetchResult:
         "Accept-Language": "en-US,en;q=0.9",
         "Cache-Control": "max-age=0",
         "Upgrade-Insecure-Requests": "1",
+        "Sec-Ch-Ua": '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"Windows"',
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
     }
 
     async def _do_fetch(target_url: str, req_timeout: float, verify_ssl: bool = True) -> FetchResult:
