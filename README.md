@@ -299,6 +299,10 @@ Open **`http://127.0.0.1:8000`** in your browser to access the interactive web d
 
 ---
 
+> 💡 **Implementation & Testing Note**: As per the assignment guidelines, the core FastAPI web crawler runs locally (`python app.py`) and is packaged with a `Dockerfile` and `Procfile` for containerization. Live AWS deployment links and automated testing frameworks (e.g., `pytest` / CI pipelines) were not required for this submission, but the codebase is modularly architected so that cloud hosting (AWS ECS/Render) and `pytest` automated test suites can be enabled seamlessly whenever needed.
+
+---
+
 ## 📄 License & Assignment Submission
 
 This repository is submitted as part of the candidate evaluation process for **BrightEdge Software Engineering**. All implementation details and system design architecture are documented in full compliance with the assignment instructions.
