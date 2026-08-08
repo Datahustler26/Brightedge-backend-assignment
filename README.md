@@ -271,7 +271,7 @@ kafka_consumergroup_lag{consumergroup="crawler-workers", topic="urls-amazon"} 42
 
 - 💰 **80% Storage Cost Reduction**: Converting raw text to **Apache Parquet with ZSTD level 3 compression** + AWS S3 Intelligent-Tiering reduces monthly storage costs from $4,600/mo to **$920/mo** (saving over **$3,680 every month**).
 - ⚡ **70% Compute Cost Reduction**: Stateless crawler worker nodes are deployed on **AWS EC2 Spot Instances** with Kubernetes Auto-scaling (HPA) and 2-minute interruption handlers.
-- 🧠 **RAM Optimization via Bloom Filters**: Deduplicating 5 Billion URLs in memory using a **Counting Bloom Filter** (0.1% false positive rate) requires only **~6.2 GB RAM** instead of 64 GB.
+- 🧠 **RAM Optimization via Bloom Filters**: Deduplicating 5 Billion URLs in memory using a **Standard Bloom Filter** (0.1% false positive rate) requires only **~8.4 GB RAM** instead of 64 GB.
 - 🚀 **Performance Acceleration**: Local **CoreDNS daemon** on worker nodes caches DNS lookups (saving ~15ms per request). Persistent **HTTP/2 multiplexing** avoids SSL/TLS handshake latency. **Delta Crawling** (HTTP ETag / `If-Modified-Since`) skips unchanged pages.
 - 🛡️ **Reliability & Fault Tolerance**: Per-domain **Circuit Breakers** automatically isolate hosts returning HTTP 429/503. Failed requests use **Exponential Backoff with Full Jitter** and Dead Letter Queues (DLQ).
 

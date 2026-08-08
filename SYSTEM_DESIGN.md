@@ -381,9 +381,9 @@ groups:
    - Crawler worker nodes are stateless. Deploying them on **AWS EC2 Spot Instances** (e.g., `c6i.2xlarge` spot nodes) yields a **70% discount** vs On-Demand pricing.
    - Graceful termination handlers listen to 2-minute Spot Interruption Notifications, pausing active fetch tasks and flushing Kafka offsets back to the frontier.
 
-3. **RAM Optimization via Counting Bloom Filters**:
+3. **RAM Optimization via Standard Bloom Filters**:
    - To deduplicate 5 Billion URLs in memory, standard hash tables require ~64 GB of RAM.
-   - Using a **Counting Bloom Filter** with a 0.1% false positive rate requires only **~6.2 GB of RAM**, allowing the entire URL frontier cache to fit inside a single small Redis instance.
+   - Using a **Standard Bloom Filter** with a 0.1% false positive rate requires only **~8.4 GB of RAM**, allowing the entire URL frontier cache to fit inside a single small Redis instance.
 
 ---
 
